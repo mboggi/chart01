@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatrible" content="ie=edge" />
+    <title>Fetch and Graph CSV</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script src="https://unpkg.com/papaparse@5.3.0/papaparse.min.js"></script>
+
+    <style>
+        .grafico {
+            max-width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .title {
+            text-align: center;
+        }
+        .parag{
+            padding: 30px;
+        }
+
+        @media (max-width: 720px) {
+            .grafico {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .grafico {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 class="title">Vacinacao Canada</h1>
+    <div>
+        <canvas class="grafico" id="chart" width="400" height="200" style="border: 1px solid #000000;"></canvas>
+    </div>
+    
+    <!--
+    <div class="grafico" style="position: relative; height:40vh; width:80vw">
+        <canvas id="chart"></canvas>
+    </div>
+    -->
+
+    <div class="parag">
+        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Modi nesciunt unde porro repellendus veritatis at
+            in deleniti, harum dicta tempora quo aperiam temporibus laboriosam blanditiis culpa exercitationem expedita
+            dolor quae!</p>
+        <p>Accusamus cum alias est modi numquam soluta corporis dolorem enim maxime vero? Facilis harum qui totam
+            praesentium accusantium dicta vitae eaque nemo, quos excepturi perferendis sit ut, id magni quasi?</p>
+    </div>
+    <script>
+
+
+
+        chartIt();
+
+
+        async function chartIt() {
+            const data = await getData();
+            //console.log(data);
+
+            const ctx = document.getElementById('chart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.xlabels,
+                    datasets: [{
+                        label1: 'AB',
+                        data: data.yvalues1,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)'
+
+                        ],
+                        borderWidth: 1
+                    }, {
+                        label2: 'BC',
+                        data: data.yvalues2,
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }
+
+                    ]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+
+        async function getData() {
+
+            const xlabels = [];
+            const yvalues1 = [];
+            const yvalues2 = [];
+
+            var corsProxy = "https://cors-anywhere.herokuapp.com/"; //having CORS issues so using a cors proxy currently
+            const response = await fetch(corsProxy + 'https://raw.githubusercontent.com/mboggi/covid19file/master/CA_vaccine_BC_AB_01.csv');
+            const data = await response.text();
+            //var data2 = Papa.parse(data);
+            const table2 = await Papa.parse("https://raw.githubusercontent.com/mboggi/covid19file/master/CA_vaccine_BC_AB_01.csv", {
+                download: true,
+                complete: function (results) {
+                    //console.log(results);
+                }
+            });
+
+
+            //console.log(table2);
+            //console.log(data);
+
+            const table = data.split('\n').slice(1);
+            //console.log(table);
+            table.forEach(row => {   //for (let i = 0;i<rows.length )
+                const columns = row.split(',')
+                const day = columns[0].replace(/['"]+/g, '');
+                const prov1 = columns[1].replace(/['"]+/g, '');
+                const prov2 = columns[2].replace(/['"]+/g, '');
+                xlabels.push(day);
+                yvalues1.push(prov1);
+                yvalues2.push(prov2);
+                console.log(day, prov1, prov2);
+
+            })
+            return { xlabels, yvalues1, yvalues2 }
+        }
+
+    </script>
+</body>
+
+</html>
